@@ -1,64 +1,88 @@
+// retrive all products from API
 const retrieveProductsData = async () =>
-    fetch("http://localhost:3000/api/products")
-        .then(res => res.json())
-        .catch(err => console.log("Oh no", err))
+  fetch("http://localhost:3000/api/products")
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        console.log(
+          `une erreur s'est produite : ${response.status} - ${response.statusText}`
+        );
+        console.log(response);
+      }
+    })
+    .catch((error) => {
+      //traitement en cas d'erreur
+      console.log("Oh no", error);
+    });
 
+// create img element for the DOM
 const createProductCardImg = (url, alt) => {
-    const $productImg = document.createElement('img')
-    $productImg.setAttribute('src', url)
-    $productImg.setAttribute('alt', alt)
-    
-    return $productImg
-}
+  const $productImg = document.createElement("img");
+  $productImg.setAttribute("src", url);
+  $productImg.setAttribute("alt", alt);
 
+  return $productImg;
+};
+
+// create product name element for the DOM
 const createProductCardH3 = (name) => {
-    const $productH3 = document.createElement('h3')
-    $productH3.classList.add('productName')
-    $productH3.innerHTML = name
-    
-    return $productH3
-}
+  const $productH3 = document.createElement("h3");
+  $productH3.classList.add("productName");
+  $productH3.innerHTML = name;
 
+  return $productH3;
+};
+
+// create product description element for the DOM
 const createProductCardP = (description) => {
-    const $productP = document.createElement('p')
-    $productP.classList.add('productDescription')
-    $productP.innerHTML = description
-    
-    return $productP
-}
+  const $productP = document.createElement("p");
+  $productP.classList.add("productDescription");
+  $productP.innerHTML = description;
 
-const createProductCardArticle = product => {
-    const $productCardArticle = document.createElement('article')
+  return $productP;
+};
 
-    const $productImg = createProductCardImg(product.imageUrl, product.altTxt)
-    const $productH3 = createProductCardH3(product.name)
-    const $productP = createProductCardP(product.description)
+// create card article element for the DOM
+const createProductCardArticle = (product) => {
+  const $productCardArticle = document.createElement("article");
 
-    $productCardArticle.appendChild($productImg)
-    $productCardArticle.appendChild($productH3)
-    $productCardArticle.appendChild($productP)
+  // call function to create inner elements
+  const $productImg = createProductCardImg(product.imageUrl, product.altTxt);
+  const $productH3 = createProductCardH3(product.name);
+  const $productP = createProductCardP(product.description);
 
-    return $productCardArticle
-}
+  // integrate element in article
+  $productCardArticle.appendChild($productImg);
+  $productCardArticle.appendChild($productH3);
+  $productCardArticle.appendChild($productP);
 
-const createProductCard = product => {
-    const $productCard = document.createElement('a')
-    $productCard.setAttribute("href", "./product.html?id=" + product._id)
-    const $productArticle = createProductCardArticle(product)
-    $productCard.appendChild($productArticle)
+  return $productCardArticle;
+};
 
-    return $productCard
-}
+// create the card element for the DOM
+const createProductCard = (product) => {
+  const $productCard = document.createElement("a");
+  $productCard.setAttribute("href", "./product.html?id=" + product._id);
+  const $productArticle = createProductCardArticle(product);
+  $productCard.appendChild($productArticle);
 
+  return $productCard;
+};
+
+/**
+ * main function
+ * retrieve product data
+ * then create card for each product
+ */
 const main = async () => {
-    const productsData = await retrieveProductsData()
-    console.log(productsData);
+  const productsData = await retrieveProductsData();
+  console.log(productsData);
 
-    const $items = document.getElementsByClassName('items')
-    for (let product of productsData) {
-        items.appendChild(createProductCard(product))
-    }
-}
+  const $items = document.getElementsByClassName("items");
+  for (let product of productsData) {
+    items.appendChild(createProductCard(product));
+  }
+};
 
-main()
-
+main();
