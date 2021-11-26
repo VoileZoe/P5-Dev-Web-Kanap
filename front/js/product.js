@@ -63,14 +63,68 @@ const createColorOptions = (colors) => {
   }
 };
 
+// create the alert element with text and an id
+const createAlert = (textAlert, id) => {
+  const alert = document.createElement("p");
+  alert.setAttribute("id", id);
+  alert.innerText = textAlert;
+  alert.style.backgroundColor = "#f54242";
+  alert.style.width = "fit-content";
+  alert.style.borderRadius = "50px";
+  alert.style.paddingLeft = "10px";
+  alert.style.paddingRight = "10px";
+
+  return alert;
+};
+
+// check if color and quantity form is valid
+const validateForm = (color, quantity) => {
+  let isValid = true;
+
+  // first remove all alerts if exist
+  document.getElementById("colorAlert")?.remove();
+  document.getElementById("quantityAlert")?.remove();
+
+  // add alert if color is empty
+  if (color === "") {
+    const itemContentSettingsColor = document.querySelector(
+      ".item__content__settings__color"
+    );
+    const colorAlert = createAlert("Veuillez saisir une couleur", "colorAlert");
+    itemContentSettingsColor.appendChild(colorAlert);
+
+    isValid = false;
+  }
+
+  // add alert if quantity is invalid
+  if (quantity < 1 || quantity > 100) {
+    const itemContentSettingsQuantity = document.querySelector(
+      ".item__content__settings__quantity"
+    );
+    const quantityAlert = createAlert(
+      "Veuillez saisir un nombre entre 1 et 100",
+      "quantityAlert"
+    );
+    itemContentSettingsQuantity.appendChild(quantityAlert);
+
+    isValid = false;
+  }
+
+  return isValid;
+};
+
 // Add product to cart
 const onAddToCart = (event) => {
   const id = productId;
   const color = productColors.value;
   const quantity = productQuantity.value;
 
-  // check in the localStorage if cart exists
+  // check if color and quantity are valid
+  if (!validateForm(color, quantity)) {
+    return;
+  }
 
+  // check in the localStorage if cart exists
   let cart = JSON.parse(localStorage.getItem("cart"));
   // if cart doesn't exist creat a new one and push informations
   if (cart === null) {
@@ -93,6 +147,8 @@ const onAddToCart = (event) => {
   localStorage.setItem("cart", JSON.stringify(cart));
 
   console.log(cart);
+  // TODO delete console.log
+  // TODO create alert validation
 };
 
 /**

@@ -1,11 +1,21 @@
 const $cartItemContainer = document.getElementById("cart__items");
 
+// retrieve cart in the localStorage
 const retrieveProductsInCart = () => {
+  const cart = localStorage.getItem("cart");
+
+  // return an empty array if the cart doesn't exist
+  if (cart === null) {
+    return [];
+  }
   return JSON.parse(localStorage.getItem("cart"));
 };
 
+// retrieve product info on server
 const retrieveProductInfo = (cartInfo) => {
+  // call the API with the id in cart info
   fetch("http://localhost:3000/api/products/" + cartInfo.id)
+    // check if response is ok
     .then((response) => {
       if (response.ok) {
         return response.json();
@@ -16,15 +26,18 @@ const retrieveProductInfo = (cartInfo) => {
         console.log(response);
       }
     })
+
+    // create productCard with both server info and cart info
     .then((serverInfo) => {
       createProductCard({ serverInfo: serverInfo, cartInfo: cartInfo });
     })
     .catch((error) => {
-      //traitement en cas d'erreur
+      // TODO : traitement en cas d'erreur
       console.log("Oh no", error);
     });
 };
 
+// generate all DOM elements
 const createProductCard = (product) => {
   console.log(product);
 
@@ -94,12 +107,6 @@ const createProductCard = (product) => {
   containerCard.appendChild(divContent);
 
   $cartItemContainer.appendChild(containerCard);
-};
-
-const retrieveInfoAndCreateCard = (cartInfo) => {
-  retrieveProductInfo(cartInfo).then((serverInfo) => {
-    createProductCard({ serverInfo: serverInfo, cartInfo: cartInfo });
-  });
 };
 
 const main = () => {
