@@ -3,7 +3,6 @@ const $cartItemContainer = document.getElementById("cart__items");
 // retrieve cart in the localStorage
 const getCart = () => {
   const cart = localStorage.getItem("cart");
-
   // return an empty array if the cart doesn't exist
   if (cart === null) {
     return [];
@@ -30,7 +29,6 @@ const retrieveProductInfo = (cartInfo) => {
         console.log(response);
       }
     })
-
     // create productCard with both server info and cart info
     .then((serverInfo) => {
       createProductCard({ serverInfo: serverInfo, cartInfo: cartInfo });
@@ -39,6 +37,22 @@ const retrieveProductInfo = (cartInfo) => {
       // TODO : traitement en cas d'erreur
       console.log("Oh no", error);
     });
+};
+
+/**
+ * function update the quantity of the product in cart
+ * retrieve cart in the localStorage
+ * find the product with the given id and color
+ * update the quantity of the product
+ * set the updated cart in the localStorage
+ */
+const updateProduct = (e, id, color) => {
+  const cart = getCart();
+  const indexToUpdate = cart.findIndex(
+    (product) => product.id === id && product.color === color
+  );
+  cart[indexToUpdate].quantity = e.target.value;
+  setCart(cart);
 };
 
 // function delete product from cart
@@ -93,8 +107,10 @@ const createProductCard = (product) => {
   btnQuantity.setAttribute("name", "itemQuantity");
   btnQuantity.setAttribute("min", "1");
   btnQuantity.setAttribute("max", "100");
-  // créer une function quantity
   btnQuantity.setAttribute("value", product.cartInfo.quantity);
+  btnQuantity.addEventListener("change", (e) =>
+    updateProduct(e, product.cartInfo.id, product.cartInfo.color)
+  );
 
   const productSettingsQuantity = document.createElement("div");
   productSettingsQuantity.classList.add(
