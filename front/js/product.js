@@ -145,10 +145,7 @@ const onAddToCart = (event) => {
     }
   }
   localStorage.setItem("cart", JSON.stringify(cart));
-
-  console.log(cart);
-  // TODO delete console.log
-  // TODO create alert validation
+  alert("Vos articles ont bien été ajoutés au panier !");
 };
 
 /**

@@ -1,7 +1,7 @@
 const $cartItemContainer = document.getElementById("cart__items");
 
 // retrieve cart in the localStorage
-const retrieveProductsInCart = () => {
+const getCart = () => {
   const cart = localStorage.getItem("cart");
 
   // return an empty array if the cart doesn't exist
@@ -9,6 +9,10 @@ const retrieveProductsInCart = () => {
     return [];
   }
   return JSON.parse(localStorage.getItem("cart"));
+};
+
+const setCart = (cart) => {
+  localStorage.setItem("cart", JSON.stringify(cart));
 };
 
 // retrieve product info on server
@@ -35,6 +39,24 @@ const retrieveProductInfo = (cartInfo) => {
       // TODO : traitement en cas d'erreur
       console.log("Oh no", error);
     });
+};
+
+// function delete product from cart
+const deleteProduct = (e, id, color) => {
+  if (confirm("Voulez-vous supprimer cet article ?")) {
+    e.target.closest("article").remove();
+    removeFromCart(id, color);
+  }
+};
+
+// function to remove element from cart
+const removeFromCart = (id, color) => {
+  const cart = getCart();
+  const indexToRemove = cart.findIndex(
+    (product) => product.id === id && product.color === color
+  );
+  cart.splice(indexToRemove, 1);
+  setCart(cart);
 };
 
 // generate all DOM elements
@@ -88,6 +110,9 @@ const createProductCard = (product) => {
   const btnDelete = document.createElement("div");
   btnDelete.classList.add("cart__item__content__settings__delete");
   btnDelete.appendChild(btnDeleteText);
+  btnDelete.addEventListener("click", (e) =>
+    deleteProduct(e, product.cartInfo.id, product.cartInfo.color)
+  );
 
   const productSettings = document.createElement("div");
   productSettings.classList.add("cart__item__content__settings");
@@ -113,7 +138,7 @@ const main = () => {
   // add listeners to buttons delete & order
 
   // retrieve cart in localStorage
-  const productsInCart = retrieveProductsInCart();
+  const productsInCart = getCart();
   for (let cartInfo of productsInCart) {
     retrieveProductInfo(cartInfo);
   }
