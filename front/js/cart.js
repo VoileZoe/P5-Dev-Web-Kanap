@@ -1,8 +1,20 @@
 const $cartItemContainer = document.getElementById("cart__items");
 
-const sumQuantity = () => {
-  total = document.getElementById("totalQuantity");
-  total.innerHTML((total += btnQuantity.target.value));
+const computeTotal = (cartInfo, serverInfo) => {
+  const elementQuantity = document.getElementById("totalQuantity");
+  const elementPrice = document.getElementById("totalPrice");
+  let totalQuantity = 0;
+  let totalPrice = 0;
+
+  for (let cartProduct of cartInfo) {
+    let serverProduct = serverInfo.find((e) => e._id === cartProduct.id);
+    totalQuantity += parseInt(cartProduct.quantity);
+    totalPrice +=
+      parseInt(cartProduct.quantity) * parseInt(serverProduct.price);
+  }
+
+  elementQuantity.innerHTML = totalQuantity;
+  elementPrice.innerHTML = totalPrice;
 };
 
 /**
@@ -45,20 +57,20 @@ const createProductCard = (product) => {
   console.log(product);
 
   const productImg = document.createElement("img");
-  productImg.setAttribute("src", product.serverInfo.imageUrl);
-  productImg.setAttribute("alt", product.serverInfo.altTxt);
+  productImg.setAttribute("src", product.serverProduct.imageUrl);
+  productImg.setAttribute("alt", product.serverProduct.altTxt);
 
   const divImg = document.createElement("div");
   divImg.classList.add("cart__item__img");
   divImg.appendChild(productImg);
 
   const productName = document.createElement("h2");
-  productName.innerHTML = product.serverInfo.name;
+  productName.innerHTML = product.serverProduct.name;
   const productColor = document.createElement("p");
-  productColor.innerHTML = product.cartInfo.color;
+  productColor.innerHTML = product.cartProduct.color;
   const productPrice = document.createElement("p");
   productPrice.innerHTML =
-    product.cartInfo.quantity * product.serverInfo.price + " €";
+    product.cartProduct.quantity * product.serverProduct.price + " €";
 
   const divContentDescription = document.createElement("div");
   divContentDescription.classList.add("cart__item__content__description");
@@ -74,9 +86,9 @@ const createProductCard = (product) => {
   btnQuantity.setAttribute("name", "itemQuantity");
   btnQuantity.setAttribute("min", "1");
   btnQuantity.setAttribute("max", "100");
-  btnQuantity.setAttribute("value", product.cartInfo.quantity);
+  btnQuantity.setAttribute("value", product.cartProduct.quantity);
   btnQuantity.addEventListener("change", (e) =>
-    updateProduct(e, product.cartInfo.id, product.cartInfo.color)
+    updateProduct(e, product.cartProduct.id, product.cartProduct.color)
   );
 
   const productSettingsQuantity = document.createElement("div");
@@ -94,7 +106,7 @@ const createProductCard = (product) => {
   btnDelete.classList.add("cart__item__content__settings__delete");
   btnDelete.appendChild(btnDeleteText);
   btnDelete.addEventListener("click", (e) =>
-    deleteProduct(e, product.cartInfo.id, product.cartInfo.color)
+    deleteProduct(e, product.cartProduct.id, product.cartProduct.color)
   );
 
   const productSettings = document.createElement("div");
@@ -109,8 +121,8 @@ const createProductCard = (product) => {
 
   const containerCard = document.createElement("article");
   containerCard.classList.add("cart__item");
-  btnQuantity.setAttribute("data-id", product.serverInfo._id);
-  btnQuantity.setAttribute("data-color", product.cartInfo.color);
+  btnQuantity.setAttribute("data-id", product.serverProduct._id);
+  btnQuantity.setAttribute("data-color", product.cartProduct.color);
   containerCard.appendChild(divImg);
   containerCard.appendChild(divContent);
 
@@ -121,17 +133,24 @@ const main = () => {
   // add listeners to buttons delete & order
 
   // retrieve cart in localStorage
-  const productsInCart = getCart();
-  for (let cartInfo of productsInCart) {
-    retrieveProductData(
-      (id = cartInfo.id),
-      (onSuccess = (serverInfo) =>
-        createProductCard({ serverInfo: serverInfo, cartInfo: cartInfo })),
-      (onError = (response) => console.log(response))
-    );
-  }
+  const cartInfo = getCart();
 
-  // create product card for each product in cart
+  // retrieve all products on server
+  retrieveProductData(
+    (id = null),
+    // on success, compute total price and quantity and then create product cards
+    (onSuccess = (serverInfo) => {
+      computeTotal(cartInfo, serverInfo);
+      for (const cartProduct of cartInfo) {
+        let serverProduct = serverInfo.find((e) => e._id === cartProduct.id);
+        createProductCard({
+          serverProduct: serverProduct,
+          cartProduct: cartProduct,
+        });
+      }
+    }),
+    (onError = (response) => console.log(response))
+  );
 };
 
 main();

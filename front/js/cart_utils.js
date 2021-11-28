@@ -8,6 +8,7 @@ const getCart = () => {
   return JSON.parse(localStorage.getItem("cart"));
 };
 
+// push cart object in the localStorage
 const setCart = (cart) => {
   localStorage.setItem("cart", JSON.stringify(cart));
 };

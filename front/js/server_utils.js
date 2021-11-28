@@ -1,3 +1,9 @@
+/**
+ * retrieve produt data on server
+ * @param {*} id optional id to specify in the url
+ * @param {*} onSuccess success callback
+ * @param {*} onError error callback
+ */
 const retrieveProductData = (id = null, onSuccess = null, onError = null) => {
   let url =
     id === null
