@@ -1,22 +1,3 @@
-// retrive all products from API
-// const retrieveProductsData = async () =>
-//   fetch("http://localhost:3000/api/products")
-//     .then((response) => {
-//       if (response.ok) {
-//         return response.json();
-//       } else {
-//         console.log(
-//           `une erreur s'est produite : ${response.status} - ${response.statusText}`
-//         );
-//         console.log(response);
-//       }
-//     })
-//     .catch((error) => {
-//       //traitement en cas d'erreur
-//       console.log("Oh no", error);
-//       // TODO traitement des erreurs
-//     });
-
 // create img element for the DOM
 const createProductCardImg = (url, alt) => {
   const $productImg = document.createElement("img");
@@ -86,7 +67,13 @@ const main = () => {
       }
     }),
     (onError = (response) => {
-      console.log(response);
+      document
+        .getElementById("items")
+        .appendChild(
+          createAlert(
+            "Une erreur s'est produite : Impossible de récupérer les produits, le serveur est inaccessible"
+          )
+        );
     })
   );
 };

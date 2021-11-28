@@ -186,7 +186,6 @@ const validateForm = () => {
 
   for (const testElement of array) {
     if (!testElement.regexp.test(testElement.input.value)) {
-      console.log(testElement.input.value + " is invalid");
       isValid = false;
       testElement.errorElement.innerText = testElement.errorMessage;
     } else {
@@ -221,10 +220,18 @@ const order = () => {
       if (response.ok) {
         return response.json();
       } else {
-        console.log("Error ", response.statusText);
+        alert(
+          "Une erreur s'est produite : impossible de passer commande, veuillez réessayer plus tard."
+        );
       }
     })
-    .then((response) => console.log(response.orderId));
+    .then((response) => {
+      setCart([]);
+      location.replace(
+        "http://127.0.0.1:5500/P5-Dev-Web-Kanap/front/html/confirmation.html?orderId=" +
+          response.orderId
+      );
+    });
 };
 
 const main = () => {
@@ -252,7 +259,13 @@ const main = () => {
       }
       computeTotal();
     }),
-    (onError = (response) => console.log(response))
+    (onError = (response) => {
+      $cartItemContainer.appendChild(
+        createAlert(
+          "Une erreur s'est produite : Impossible d'afficher les produits du panier"
+        )
+      );
+    })
   );
 };
 
