@@ -1,42 +1,8 @@
 const $cartItemContainer = document.getElementById("cart__items");
 
-// retrieve cart in the localStorage
-const getCart = () => {
-  const cart = localStorage.getItem("cart");
-  // return an empty array if the cart doesn't exist
-  if (cart === null) {
-    return [];
-  }
-  return JSON.parse(localStorage.getItem("cart"));
-};
-
-const setCart = (cart) => {
-  localStorage.setItem("cart", JSON.stringify(cart));
-};
-
-// retrieve product info on server
-const retrieveProductInfo = (cartInfo) => {
-  // call the API with the id in cart info
-  fetch("http://localhost:3000/api/products/" + cartInfo.id)
-    // check if response is ok
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        console.log(
-          `une erreur s'est produite : ${response.status} - ${response.statusText}`
-        );
-        console.log(response);
-      }
-    })
-    // create productCard with both server info and cart info
-    .then((serverInfo) => {
-      createProductCard({ serverInfo: serverInfo, cartInfo: cartInfo });
-    })
-    .catch((error) => {
-      // TODO : traitement en cas d'erreur
-      console.log("Oh no", error);
-    });
+const sumQuantity = () => {
+  total = document.getElementById("totalQuantity");
+  total.innerHTML((total += btnQuantity.target.value));
 };
 
 /**
@@ -53,6 +19,7 @@ const updateProduct = (e, id, color) => {
   );
   cart[indexToUpdate].quantity = e.target.value;
   setCart(cart);
+  sumQuantity();
 };
 
 // function delete product from cart
@@ -156,7 +123,12 @@ const main = () => {
   // retrieve cart in localStorage
   const productsInCart = getCart();
   for (let cartInfo of productsInCart) {
-    retrieveProductInfo(cartInfo);
+    retrieveProductData(
+      (id = cartInfo.id),
+      (onSuccess = (serverInfo) =>
+        createProductCard({ serverInfo: serverInfo, cartInfo: cartInfo })),
+      (onError = (response) => console.log(response))
+    );
   }
 
   // create product card for each product in cart

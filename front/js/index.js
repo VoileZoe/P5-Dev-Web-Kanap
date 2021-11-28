@@ -1,20 +1,21 @@
 // retrive all products from API
-const retrieveProductsData = async () =>
-  fetch("http://localhost:3000/api/products")
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        console.log(
-          `une erreur s'est produite : ${response.status} - ${response.statusText}`
-        );
-        console.log(response);
-      }
-    })
-    .catch((error) => {
-      //traitement en cas d'erreur
-      console.log("Oh no", error);
-    });
+// const retrieveProductsData = async () =>
+//   fetch("http://localhost:3000/api/products")
+//     .then((response) => {
+//       if (response.ok) {
+//         return response.json();
+//       } else {
+//         console.log(
+//           `une erreur s'est produite : ${response.status} - ${response.statusText}`
+//         );
+//         console.log(response);
+//       }
+//     })
+//     .catch((error) => {
+//       //traitement en cas d'erreur
+//       console.log("Oh no", error);
+//       // TODO traitement des erreurs
+//     });
 
 // create img element for the DOM
 const createProductCardImg = (url, alt) => {
@@ -75,14 +76,19 @@ const createProductCard = (product) => {
  * retrieve product data
  * then create card for each product
  */
-const main = async () => {
-  const productsData = await retrieveProductsData();
-  console.log(productsData);
-
-  const $items = document.getElementsByClassName("items");
-  for (let product of productsData) {
-    items.appendChild(createProductCard(product));
-  }
+const main = () => {
+  retrieveProductData(
+    (id = null),
+    (onSuccess = (response) => {
+      const $items = document.getElementsByClassName("items");
+      for (let product of response) {
+        items.appendChild(createProductCard(product));
+      }
+    }),
+    (onError = (response) => {
+      console.log(response);
+    })
+  );
 };
 
 main();
