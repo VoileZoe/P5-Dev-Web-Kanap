@@ -6,8 +6,12 @@ const $addressElement = document.getElementById("address");
 const $cityElement = document.getElementById("city");
 const $emailElement = document.getElementById("email");
 
+let serverInfo = [];
+
 // compute quantity and price
-const computeTotal = (cartInfo, serverInfo) => {
+const computeTotal = () => {
+  const cartInfo = getCart();
+
   const elementQuantity = document.getElementById("totalQuantity");
   const elementPrice = document.getElementById("totalPrice");
   let totalQuantity = 0;
@@ -38,7 +42,6 @@ const updateProduct = (e, id, color) => {
   );
   cart[indexToUpdate].quantity = e.target.value;
   setCart(cart);
-  sumQuantity();
 };
 
 // function delete product from cart
@@ -61,8 +64,6 @@ const removeFromCart = (id, color) => {
 
 // generate all DOM elements
 const createProductCard = (product) => {
-  console.log(product);
-
   const productImg = document.createElement("img");
   productImg.setAttribute("src", product.serverProduct.imageUrl);
   productImg.setAttribute("alt", product.serverProduct.altTxt);
@@ -76,8 +77,7 @@ const createProductCard = (product) => {
   const productColor = document.createElement("p");
   productColor.innerHTML = product.cartProduct.color;
   const productPrice = document.createElement("p");
-  productPrice.innerHTML =
-    product.cartProduct.quantity * product.serverProduct.price + " €";
+  productPrice.innerHTML = product.serverProduct.price + " €";
 
   const divContentDescription = document.createElement("div");
   divContentDescription.classList.add("cart__item__content__description");
@@ -94,9 +94,10 @@ const createProductCard = (product) => {
   btnQuantity.setAttribute("min", "1");
   btnQuantity.setAttribute("max", "100");
   btnQuantity.setAttribute("value", product.cartProduct.quantity);
-  btnQuantity.addEventListener("change", (e) =>
-    updateProduct(e, product.cartProduct.id, product.cartProduct.color)
-  );
+  btnQuantity.addEventListener("change", (e) => {
+    updateProduct(e, product.cartProduct.id, product.cartProduct.color);
+    computeTotal();
+  });
 
   const productSettingsQuantity = document.createElement("div");
   productSettingsQuantity.classList.add(
@@ -112,9 +113,10 @@ const createProductCard = (product) => {
   const btnDelete = document.createElement("div");
   btnDelete.classList.add("cart__item__content__settings__delete");
   btnDelete.appendChild(btnDeleteText);
-  btnDelete.addEventListener("click", (e) =>
-    deleteProduct(e, product.cartProduct.id, product.cartProduct.color)
-  );
+  btnDelete.addEventListener("click", (e) => {
+    deleteProduct(e, product.cartProduct.id, product.cartProduct.color);
+    computeTotal();
+  });
 
   const productSettings = document.createElement("div");
   productSettings.classList.add("cart__item__content__settings");
@@ -226,9 +228,6 @@ const order = () => {
 };
 
 const main = () => {
-  // retrieve cart in localStorage
-  const cartInfo = getCart();
-
   // add listeners to order button
   document.getElementById("order").addEventListener("click", (e) => {
     e.preventDefault();
@@ -241,8 +240,9 @@ const main = () => {
   retrieveProductData(
     (id = null),
     // on success, compute total price and quantity and then create product cards
-    (onSuccess = (serverInfo) => {
-      computeTotal(cartInfo, serverInfo);
+    (onSuccess = (response) => {
+      serverInfo = response;
+      cartInfo = getCart();
       for (const cartProduct of cartInfo) {
         let serverProduct = serverInfo.find((e) => e._id === cartProduct.id);
         createProductCard({
@@ -250,6 +250,7 @@ const main = () => {
           cartProduct: cartProduct,
         });
       }
+      computeTotal();
     }),
     (onError = (response) => console.log(response))
   );
