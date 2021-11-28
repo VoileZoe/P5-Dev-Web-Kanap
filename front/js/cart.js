@@ -1,5 +1,12 @@
 const $cartItemContainer = document.getElementById("cart__items");
 
+const $firstNameElement = document.getElementById("firstName");
+const $lastNameElement = document.getElementById("lastName");
+const $addressElement = document.getElementById("address");
+const $cityElement = document.getElementById("city");
+const $emailElement = document.getElementById("email");
+
+// compute quantity and price
 const computeTotal = (cartInfo, serverInfo) => {
   const elementQuantity = document.getElementById("totalQuantity");
   const elementPrice = document.getElementById("totalPrice");
@@ -129,11 +136,106 @@ const createProductCard = (product) => {
   $cartItemContainer.appendChild(containerCard);
 };
 
-const main = () => {
-  // add listeners to buttons delete & order
+/**function to valid the form
+ * test the content of inputs with regexp
+ * create error message if the test doesn't pass
+ * @returns isValid if all tests passed
+ */
+const validateForm = () => {
+  let isValid = true;
 
+  const array = [
+    {
+      regexp: /^[A-Z][A-zÀ-ú]+$/,
+      input: $firstNameElement,
+      errorElement: document.getElementById("firstNameErrorMsg"),
+      errorMessage:
+        "Veuillez remplir le champ Prénom en commençant par une majuscule afin de valider votre commande.",
+    },
+    {
+      regexp: /^[A-Z][A-zÀ-ú]+$/,
+      input: $lastNameElement,
+      errorElement: document.getElementById("lastNameErrorMsg"),
+      errorMessage:
+        "Veuillez remplir le champ Nom en commençant par une majuscule afin de valider votre commande.",
+    },
+    {
+      regexp: /^.+$/,
+      input: $addressElement,
+      errorElement: document.getElementById("addressErrorMsg"),
+      errorMessage:
+        "Veuillez remplir le champ adresse afin de valider votre commande.",
+    },
+    {
+      regexp: /^[A-Z][A-zÀ-ú]+$/,
+      input: $cityElement,
+      errorElement: document.getElementById("cityErrorMsg"),
+      errorMessage:
+        "Veuillez remplir le champ Ville en commençant par une majuscule afin de valider votre commande.",
+    },
+    {
+      regexp: /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/,
+      input: $emailElement,
+      errorElement: document.getElementById("emailErrorMsg"),
+      errorMessage:
+        "Veuillez remplir le champ Email afin de valider votre commande.",
+    },
+  ];
+
+  for (const testElement of array) {
+    if (!testElement.regexp.test(testElement.input.value)) {
+      console.log(testElement.input.value + " is invalid");
+      isValid = false;
+      testElement.errorElement.innerText = testElement.errorMessage;
+    } else {
+      testElement.errorElement.innerText = "";
+    }
+  }
+  return isValid;
+};
+
+// create contact en products object then post it to the API
+const order = () => {
+  const cart = getCart();
+
+  const contact = {
+    firstName: $firstNameElement.value,
+    lastName: $lastNameElement.value,
+    address: $addressElement.value,
+    city: $cityElement.value,
+    email: $emailElement.value,
+  };
+  const products = [];
+  for (const product of cart) {
+    products.push(product.id);
+  }
+
+  fetch("http://localhost:3000/api/products/order", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ contact: contact, products: products }),
+  })
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        console.log("Error ", response.statusText);
+      }
+    })
+    .then((response) => console.log(response.orderId));
+};
+
+const main = () => {
   // retrieve cart in localStorage
   const cartInfo = getCart();
+
+  // add listeners to order button
+  document.getElementById("order").addEventListener("click", (e) => {
+    e.preventDefault();
+    if (validateForm()) {
+      order();
+    }
+  });
 
   // retrieve all products on server
   retrieveProductData(
