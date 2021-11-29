@@ -228,18 +228,28 @@ const order = () => {
     .then((response) => {
       if (response.ok) {
         return response.json();
-      } else {
-        alert(
-          "Une erreur s'est produite : impossible de passer commande, veuillez réessayer plus tard."
-        );
+      } else if (response.status == 404) {
+        //le produit n'existe pas
+        throw new Error(response.statusText);
       }
+
+      throw new Error("error message");
     })
     .then((response) => {
-      setCart([]);
+      localStorage.setItem("orderId", response.orderId);
       location.replace(
-        "http://127.0.0.1:5500/P5-Dev-Web-Kanap/front/html/confirmation.html?orderId=" +
-          response.orderId
+        "http://127.0.0.1:5500/P5-Dev-Web-Kanap/front/html/confirmation.html"
       );
+    })
+    .catch((response) => {
+      document
+        .getElementById("cartAndFormContainer")
+        .appendChild(
+          createAlert(
+            "Une erreur s'est produite : Impossible de passer commande, veuillez réessayer plus tard.\n" +
+              response
+          )
+        );
     });
 };
 
