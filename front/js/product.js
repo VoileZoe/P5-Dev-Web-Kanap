@@ -1,12 +1,3 @@
-// products data info
-const productContainerImg = document.querySelector(".item__img");
-const productName = document.getElementById("title");
-const productDescription = document.getElementById("description");
-const productColors = document.getElementById("colors");
-const productPrice = document.getElementById("price");
-const productQuantity = document.getElementById("quantity");
-const addToCartBtn = document.getElementById("addToCart");
-
 // retrieve id in URL param
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
@@ -14,6 +5,10 @@ const productId = urlParams.get("id");
 
 // fill infos for the DOM
 const fillProductInfo = (productData) => {
+  const productContainerImg = document.querySelector(".item__img");
+  const productName = document.getElementById("title");
+  const productDescription = document.getElementById("description");
+  const productPrice = document.getElementById("price");
   productContainerImg.appendChild(
     createProductImg(productData.imageUrl, productData.altTxt)
   );
@@ -35,6 +30,8 @@ const createProductImg = (url, alt) => {
 
 // create color selector element for the DOM
 const createColorOptions = (colors) => {
+  const productColors = document.getElementById("colors");
+
   // for each color, create DOM option element and append to DOM productColors
   for (let color of colors) {
     const option = document.createElement("option");
@@ -69,7 +66,7 @@ const validateForm = (color, quantity) => {
       ".item__content__settings__quantity"
     );
     const quantityAlert = createAlert(
-      "Veuillez saisir un nombre entre 1 et 100",
+      "Veuillez saisir une quantité entre 1 et 100",
       "quantityAlert"
     );
     itemContentSettingsQuantity.appendChild(quantityAlert);
@@ -80,11 +77,26 @@ const validateForm = (color, quantity) => {
   return isValid;
 };
 
+// function to redirect to the home page after adding product to cart
+const redirectToHomePage = (quantity) => {
+  const confirmString =
+    parseInt(quantity) > 1
+      ? "Vos articles ont bien été ajoutés au panier"
+      : "Votre article a bien été ajouté au panier";
+  if (
+    confirm(`${confirmString}\nVoulez-vous retourner sur la page d'accueil ?`)
+  ) {
+    location.replace(
+      "http://127.0.0.1:5500/P5-Dev-Web-Kanap/front/html/index.html"
+    );
+  }
+};
+
 // Add product to cart
 const onAddToCart = (event) => {
   const id = productId;
-  const color = productColors.value;
-  const quantity = productQuantity.value;
+  const color = document.getElementById("colors").value;
+  const quantity = document.getElementById("quantity").value;
 
   // check if color and quantity are valid
   if (!validateForm(color, quantity)) {
@@ -103,7 +115,7 @@ const onAddToCart = (event) => {
       parseInt(cart[productIndex].quantity) + parseInt(quantity);
   }
   setCart(cart);
-  alert("Vos articles ont bien été ajoutés au panier !");
+  redirectToHomePage(quantity);
 };
 
 /**
@@ -112,9 +124,30 @@ const onAddToCart = (event) => {
  * then create card for each product
  */
 const main = () => {
-  addToCartBtn.addEventListener("click", onAddToCart);
+  document.getElementById("addToCart").addEventListener("click", onAddToCart);
 
-  retrieveProductData(productId, fillProductInfo, null);
+  fetch("http://localhost:3000/api/products/" + productId)
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else if (response.status == 404) {
+        //le produit n'existe pas
+        throw new Error(response.statusText);
+      }
+
+      throw new Error("error message");
+    })
+    .then(fillProductInfo)
+    .catch((response) => {
+      document
+        .querySelector(".item__content__settings")
+        .appendChild(
+          createAlert(
+            "Une erreur s'est produite : Impossible de récupérer le produit.\n" +
+              response
+          )
+        );
+    });
 };
 
 main();

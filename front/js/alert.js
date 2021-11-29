@@ -6,8 +6,10 @@ const createAlert = (textAlert, id) => {
   alert.style.backgroundColor = "#f54242";
   alert.style.width = "fit-content";
   alert.style.borderRadius = "50px";
-  alert.style.paddingLeft = "10px";
-  alert.style.paddingRight = "10px";
+  alert.style.padding = "5px 15px 5px 15px";
+  alert.style.margin = "auto";
+  alert.style.marginTop = "10px";
+  alert.style.marginBottom = "10px";
 
   return alert;
 };

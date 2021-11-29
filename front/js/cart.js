@@ -138,6 +138,15 @@ const createProductCard = (product) => {
   $cartItemContainer.appendChild(containerCard);
 };
 
+const isCartEmpty = () => {
+  console.log("hello");
+  if (getCart().length == 0) {
+    alert("Votre panier est vide.");
+    return true;
+  }
+  return false;
+};
+
 /**function to valid the form
  * test the content of inputs with regexp
  * create error message if the test doesn't pass
@@ -148,35 +157,35 @@ const validateForm = () => {
 
   const array = [
     {
-      regexp: /^[A-Z][A-zÀ-ú]+$/,
+      regexp: /^[A-zÜ-ü ,.'-]+$/,
       input: $firstNameElement,
       errorElement: document.getElementById("firstNameErrorMsg"),
       errorMessage:
-        "Veuillez remplir le champ Prénom en commençant par une majuscule afin de valider votre commande.",
+        "Veuillez remplir le champ Prénom afin de valider votre commande.",
     },
     {
-      regexp: /^[A-Z][A-zÀ-ú]+$/,
+      regexp: /^[A-zÜ-ü ,.'-]+$/,
       input: $lastNameElement,
       errorElement: document.getElementById("lastNameErrorMsg"),
       errorMessage:
-        "Veuillez remplir le champ Nom en commençant par une majuscule afin de valider votre commande.",
+        "Veuillez remplir le champ Nom afin de valider votre commande.",
     },
     {
-      regexp: /^.+$/,
+      regexp: /^[A-zÜ-ü0-9 ,.'-]+$/,
       input: $addressElement,
       errorElement: document.getElementById("addressErrorMsg"),
       errorMessage:
         "Veuillez remplir le champ adresse afin de valider votre commande.",
     },
     {
-      regexp: /^[A-Z][A-zÀ-ú]+$/,
+      regexp: /^[A-zÜ-ü ,.'-]+$/,
       input: $cityElement,
       errorElement: document.getElementById("cityErrorMsg"),
       errorMessage:
-        "Veuillez remplir le champ Ville en commençant par une majuscule afin de valider votre commande.",
+        "Veuillez remplir le champ Ville afin de valider votre commande.",
     },
     {
-      regexp: /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/,
+      regexp: /^[a-z0-9-]+@[a-z0-9-]+\.[a-z]{2,12}$/,
       input: $emailElement,
       errorElement: document.getElementById("emailErrorMsg"),
       errorMessage:
@@ -238,16 +247,25 @@ const main = () => {
   // add listeners to order button
   document.getElementById("order").addEventListener("click", (e) => {
     e.preventDefault();
-    if (validateForm()) {
+    if (validateForm() && !isCartEmpty()) {
+      console.log("coucou");
       order();
     }
   });
 
   // retrieve all products on server
-  retrieveProductData(
-    (id = null),
-    // on success, compute total price and quantity and then create product cards
-    (onSuccess = (response) => {
+  fetch("http://localhost:3000/api/products")
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else if (response.status == 404) {
+        //le produit n'existe pas
+        throw new Error(response.statusText);
+      }
+
+      throw new Error("error message");
+    })
+    .then((response) => {
       serverInfo = response;
       cartInfo = getCart();
       for (const cartProduct of cartInfo) {
@@ -258,15 +276,15 @@ const main = () => {
         });
       }
       computeTotal();
-    }),
-    (onError = (response) => {
+    })
+    .catch((response) => {
       $cartItemContainer.appendChild(
         createAlert(
-          "Une erreur s'est produite : Impossible d'afficher les produits du panier"
+          "Une erreur s'est produite : Impossible de récupérer les produits.\n" +
+            response
         )
       );
-    })
-  );
+    });
 };
 
 main();

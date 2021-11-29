@@ -58,24 +58,33 @@ const createProductCard = (product) => {
  * then create card for each product
  */
 const main = () => {
-  retrieveProductData(
-    (id = null),
-    (onSuccess = (response) => {
+  fetch("http://localhost:3000/api/products")
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else if (response.status == 404) {
+        //le produit n'existe pas
+        throw new Error(response.statusText);
+      }
+
+      throw new Error("error message");
+    })
+    .then((response) => {
       const $items = document.getElementsByClassName("items");
       for (let product of response) {
         items.appendChild(createProductCard(product));
       }
-    }),
-    (onError = (response) => {
+    })
+    .catch((response) => {
       document
         .getElementById("items")
         .appendChild(
           createAlert(
-            "Une erreur s'est produite : Impossible de récupérer les produits, le serveur est inaccessible"
+            "Une erreur s'est produite : Impossible de récupérer les produits.\n" +
+              response
           )
         );
-    })
-  );
+    });
 };
 
 main();
